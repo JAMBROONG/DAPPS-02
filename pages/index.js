@@ -8,6 +8,7 @@ export default function Home() {
   const [dropdown1, setDropdown1] = useState(false);
   const [dropdown2, setDropdown2] = useState(false);
   const [balance, setBalanace] = useState('');
+  const [amount, setAmount] = useState(0);
   const [network1, setNetwork1] = useState({
     img: "/eth-icon.svg",
     text: "Ethereum Mainnet",
@@ -47,6 +48,12 @@ export default function Home() {
     await logout();
     setWallet("Connect Wallet");
     console.log("logged out");
+  }
+
+  function hanyaAngka(event) {
+    let inp = event.target.value.replace(/[^,.\d]/g, '').toString().replace(/,/g, '.');
+    setAmount(inp);
+    return event.target.value = inp;
   }
 
   return (
@@ -162,6 +169,7 @@ export default function Home() {
                       name="send"
                       id="send"
                       className="form-control"
+                      onInput={(event) => {hanyaAngka(event)}}
                     />
                   </div>
                 </div>
@@ -255,6 +263,7 @@ export default function Home() {
                       id="receive"
                       className="form-control"
                       disabled
+                      value={amount}
                     />
                   </div>
                 </div>

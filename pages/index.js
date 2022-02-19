@@ -21,73 +21,76 @@ export default function Home() {
   Moralis.serverURL = process.env.NEXT_PUBLIC_SERVER_URL;
   const amountValue = useRef(null);
 
-  useEffect(async () => {
-    if (isAuthenticated) {
-      if (!login) {
-        logout();
+  useEffect(() => {
+    async function efek() {
+      if (isAuthenticated) {
+        if (!login) {
+          logout();
+        } else {
+          const web3 = new Web3(window.ethereum);
+          const walletAddress = await user.get("ethAddress");
+          setWallet(
+            walletAddress.slice(0, 5) +
+              "..." +
+              walletAddress.slice(
+                walletAddress.length - 4,
+                walletAddress.length - 0
+              )
+          );
+          // const options = { chain: 'bsc', address: walletAddress, token_addresses: "0xc98a8EC7A07f1b743E86896a52434C4C6A0Dbc42" }
+  
+          const options = {
+            chain: "bsc",
+            address: walletAddress,
+            token_addresses: process.env.TOKEN_V1,
+          };
+          const balances = await Moralis.Web3API.account.getTokenBalances(
+            options
+          );
+          console.log(balances);
+  
+          const options2 = {
+            chain: "bsc",
+            address: walletAddress,
+            token_addresses: process.env.TOKEN_V2,
+          };
+          const balances2 = await Moralis.Web3API.account.getTokenBalances(
+            options2
+          );
+          console.log(balances2);
+  
+          let tokcontract = new web3.eth.Contract(V2ABI, process.env.TOKEN_V1);
+          const isAprove = await tokcontract.methods
+            .allowance(walletAddress, process.env.TOKEN_V2)
+            .call();
+          console.log(isAprove);
+          if (isAprove > 0) {
+            setApproved(true);
+          }
+  
+          if (balances2.length > 0) {
+            setBalanace2(balances2[0].balance / 10 ** 9);
+          }
+          if (balances.length > 0) {
+            setBalanace(balances[0].balance / 10 ** 9);
+          }
+        }
       } else {
-        const web3 = new Web3(window.ethereum);
-        const walletAddress = await user.get("ethAddress");
-        setWallet(
-          walletAddress.slice(0, 5) +
-            "..." +
-            walletAddress.slice(
-              walletAddress.length - 4,
-              walletAddress.length - 0
-            )
-        );
-        // const options = { chain: 'bsc', address: walletAddress, token_addresses: "0xc98a8EC7A07f1b743E86896a52434C4C6A0Dbc42" }
-
-        const options = {
-          chain: "bsc",
-          address: walletAddress,
-          token_addresses: process.env.TOKEN_V1,
-        };
-        const balances = await Moralis.Web3API.account.getTokenBalances(
-          options
-        );
-        console.log(balances);
-
-        const options2 = {
-          chain: "bsc",
-          address: walletAddress,
-          token_addresses: process.env.TOKEN_V2,
-        };
-        const balances2 = await Moralis.Web3API.account.getTokenBalances(
-          options2
-        );
-        console.log(balances2);
-
-        let tokcontract = new web3.eth.Contract(V2ABI, process.env.TOKEN_V1);
-        const isAprove = await tokcontract.methods
-          .allowance(walletAddress, process.env.TOKEN_V2)
-          .call();
-        console.log(isAprove);
-        if (isAprove > 0) {
-          setApproved(true);
-        }
-
-        if (balances2.length > 0) {
-          setBalanace2(balances2[0].balance / 10 ** 9);
-        }
-        if (balances.length > 0) {
-          setBalanace(balances[0].balance / 10 ** 9);
-        }
+        setAmount("0");
+        setMaxAmount("0");
       }
-    } else {
-      setAmount("0");
-      setMaxAmount("0");
+      async function listenMMAccount() {
+        window.ethereum.on("accountsChanged", async function () {
+          logout();
+          setBalanace("0");
+          setBalanace2("0");
+          setApproved(false);
+          setLogin(false);
+        });
+      }
+      listenMMAccount();
     }
-    async function listenMMAccount() {
-      window.ethereum.on("accountsChanged", async function () {
-        logout();
-        setBalanace("0");
-        setBalanace2("0");
-        setApproved(false);
-        setLogin(false);
-      });
-    }
-    listenMMAccount();
+    efek();
   }, [isAuthenticated]);
 
   async function loginEvt() {
@@ -354,14 +357,14 @@ export default function Home() {
       <div className="container-fluid">
         <div className="row mt-3 bg-none justify-content-md-center">
           <div className="col-lg-8">
-            <img className="img-header" src="/asix.png" />
+            <img alt="" className="img-header" src="/asix.png" />
           </div>
           <div className="col-lg-4">
             <div className="d-flex float-right justify-content-md-center">
               {isAuthenticated ? (
                 <>
                   <button className="btn-wallet-address">
-                    <img className="img-option" src="/asix.png" />
+                    <img alt="" className="img-option" src="/asix.png" />
                     {wallet}
                   </button>
                   <button
@@ -421,7 +424,7 @@ export default function Home() {
                   <div className="input-group form">
                     <div className="input-group-prepend">
                       <span className="input-group-text">
-                        <img
+                        <img alt=""
                           className="img-asix"
                           src={form == "v1" ? "/asix01.png" : "/asix02.png"}
                         />
@@ -499,7 +502,7 @@ export default function Home() {
                   <div className="input-group form">
                     <div className="input-group-prepend">
                       <span className="input-group-text">
-                        <img
+                        <img alt=""
                           className="img-asix"
                           src={form == "v1" ? "/asix02.png" : "/asix01.png"}
                         />
@@ -578,6 +581,7 @@ export default function Home() {
               <a
                 href={"https://bscscan.com/token/" + process.env.TOKEN_V1}
                 target={"_blank"}
+                rel='noreferrer'
                 style={{ color: "black !important" }}
               >
                 {" " + process.env.TOKEN_V1}
@@ -602,6 +606,7 @@ export default function Home() {
               <a
                 href={"https://bscscan.com/token/" + process.env.TOKEN_V2}
                 target={"_blank"}
+                rel="noreferrer"
                 style={{ color: "black !important" }}
               >
                 {" " + process.env.TOKEN_V2}

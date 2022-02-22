@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Web3 from "web3";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { BigNumber } from "bignumber.js";
 
 export default function Home() {
   const { isAuthenticated, authenticate, user, logout } = useMoralis();
@@ -38,7 +39,7 @@ export default function Home() {
               )
           );
           // const options = { chain: 'bsc', address: walletAddress, token_addresses: "0xc98a8EC7A07f1b743E86896a52434C4C6A0Dbc42" }
-  
+
           const options = {
             chain: "bsc",
             address: walletAddress,
@@ -48,7 +49,7 @@ export default function Home() {
             options
           );
           console.log(balances);
-  
+
           const options2 = {
             chain: "bsc",
             address: walletAddress,
@@ -58,7 +59,7 @@ export default function Home() {
             options2
           );
           console.log(balances2);
-  
+
           let tokcontract = new web3.eth.Contract(V2ABI, process.env.TOKEN_V1);
           const isAprove = await tokcontract.methods
             .allowance(walletAddress, process.env.TOKEN_V2)
@@ -67,7 +68,7 @@ export default function Home() {
           if (isAprove > 0) {
             setApproved(true);
           }
-  
+
           if (balances2.length > 0) {
             setBalanace2(balances2[0].balance / 10 ** 9);
           }
@@ -170,9 +171,7 @@ export default function Home() {
       await Moralis.enableWeb3();
 
       let tokcontract = new web3.eth.Contract(V2ABI, process.env.TOKEN_V1);
-      const amountApprove = (100000000 * 10 ** 18).toLocaleString("fullwide", {
-        useGrouping: false,
-      });
+      const amountApprove = new BigNumber(100000000 * 10 ** 18).toFixed()
       tokcontract.methods.approve(process.env.TOKEN_V2, amountApprove).send(
         {
           from: walletAddress,
@@ -214,8 +213,7 @@ export default function Home() {
       await Moralis.enableWeb3();
 
       let SwapV1 = new web3.eth.Contract(V2ABI, process.env.TOKEN_V2);
-      const amountSwap =
-        parseInt(amountValue.current.value.replace(/,/g, "")) * 10 ** 9;
+      const amountSwap = new BigNumber(parseInt(amountValue.current.value.replace(/,/g, "")) * 10 ** 9);
 
       SwapV1.methods.Swap_to_V1(amountSwap).send(
         {
@@ -284,8 +282,7 @@ export default function Home() {
       await Moralis.enableWeb3();
 
       let SwapV2 = new web3.eth.Contract(V2ABI, process.env.TOKEN_V2);
-      const amountSwap =
-        parseInt(amountValue.current.value.replace(/,/g, "")) * 10 ** 9;
+      const amountSwap =  new BigNumber(parseInt(amountValue.current.value.replace(/,/g, "")) * 10 ** 9);
 
       SwapV2.methods.Swap_to_V2(amountSwap).send(
         {
@@ -424,7 +421,8 @@ export default function Home() {
                   <div className="input-group form">
                     <div className="input-group-prepend">
                       <span className="input-group-text">
-                        <img alt=""
+                        <img
+                          alt=""
                           className="img-asix"
                           src={form == "v1" ? "/asix01.png" : "/asix02.png"}
                         />
@@ -502,7 +500,8 @@ export default function Home() {
                   <div className="input-group form">
                     <div className="input-group-prepend">
                       <span className="input-group-text">
-                        <img alt=""
+                        <img
+                          alt=""
                           className="img-asix"
                           src={form == "v1" ? "/asix02.png" : "/asix01.png"}
                         />
@@ -581,7 +580,7 @@ export default function Home() {
               <a
                 href={"https://bscscan.com/token/" + process.env.TOKEN_V1}
                 target={"_blank"}
-                rel='noreferrer'
+                rel="noreferrer"
                 style={{ color: "black !important" }}
               >
                 {" " + process.env.TOKEN_V1}
